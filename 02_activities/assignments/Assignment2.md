@@ -53,11 +53,67 @@ The store wants to keep customer addresses. Propose two architectures for the CU
 
 **HINT:** search type 1 vs type 2 slowly changing dimensions. 
 
-```
-Your answer...
-```
+## Type 1: Overwriting the Address (No History)
 
-***
+In this architecture, when a customer changes their address, the old address is simply **overwritten** by the new one. Only the most recent address is retained, and no history of previous addresses is preserved.
+
+### Table Design for Type 1 (Overwrite)
+
+Column Name	 	        Description
+customer_id (PK)		Unique identifier for the customer
+address_line1		    First line of the customer's address
+address_line2		    Second line of the customer's address 
+city		            City of the customer
+state		            State or region of the customer
+zip_code		        Postal code of the customer's address
+country		            Country of the customer
+updated_at		        Timestamp of when the address was last updated
+
+
+### Explanation
+- Each **customer** can have only **one address** at a time.
+- When an address is changed, the **old address is overwritten** by the new one.
+- The `updated_at`field records when the address was last updated.
+  
+### Pros and Cons
+- Pros: Simple to manage and query.
+- Cons: No historical record of previous addresses is preserved.
+
+## Type 2: Retaining Address History (Full History)
+
+In this architecture, every time a customer updates their address, a **new record** is created to retain the history of all addresses. This allows tracking of address changes over time.
+
+### Table Design for Type 2 (Retain History)
+
+Column Name		        Description
+customer_id (PK)		Unique identifier for the customer
+address_id (PK)		    Unique identifier for each address record 
+address_line1		    First line of the customer's address
+address_line2		    Second line of the customer's address 
+city		            City of the customer
+state		            State or region of the customer
+zip_code 	            Postal code of the customer's address
+country		            Country of the customer
+start_date		        The date when the address became active
+end_date		        The date when the address was replaced (NULL if current)
+
+### Explanation
+- A new record is created for each new address change.
+- The `start_date`indicates when the address became effective, and the `end_date`indicates when the address was replaced by another one.
+- If the `end_date`is NULL, the address is still the current active address for the customer.
+
+### Pros and Cons
+- Pros: Allows tracking of the complete history of customer addresses.
+- Cons: More complex to manage and query, as multiple records may exist for a single customer.
+
+## Type 1 vs Type 2
+- Type 1 (Overwrite): In this approach, the **address is overwritten**, and only the most recent address is kept. No history is retained. This is the Type 1 design.
+- Type 2 (Retain History): In this approach, **each address change** creates a new record, retaining all previous addresses. This is the Type 2  design.
+
+--- Conclusion
+- Type 1 (Overwrite): Best when you only need to store the current address, and you don't require historical tracking.
+- Type 2 (Retain History): Best when it's important to maintain a **complete history** of addresses over time, allowing you to track address changes.
+
 
 ## Section 2:
 You can start this section following *session 4*.
